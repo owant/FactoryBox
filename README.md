@@ -59,3 +59,7 @@ public final class EventFactory {
 }
 
 ```
+
+
+## 好处
+实现工厂模式的拓展，不关心工厂的实现，工厂由代码进行生成。减少了更改。
