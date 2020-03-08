@@ -1,0 +1,15 @@
+apply plugin: 'java-library'
+
+dependencies {
+    annotationProcessor 'com.google.auto.service:auto-service:1.0-rc6'
+    compileOnly 'com.google.auto.service:auto-service:1.0-rc6'
+    implementation 'com.squareup:javapoet:1.11.1'
+}
+
+//默认编码对于java工程需要进行设置
+tasks.withType(JavaCompile) {
+    options.encoding = "utf-8"
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
