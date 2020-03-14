@@ -41,22 +41,35 @@ package com.owant.createcode.testcode;
 
 import java.lang.Exception;
 import java.lang.String;
+import java.util.HashMap;
 
 public final class EventFactory {
-  public static Event create(String key) throws Exception {
+  private final HashMap<String, Event> products;
+
+  public EventFactory() {
+    this.products = new HashMap<String,Event>();
+  }
+
+  public Event create(String key) throws Exception {
+    Event cache=products.get(key);
+    if(cache!=null) {
+      return cache;
+    }
     if("sub_event".equals(key)) {
-      return new com.owant.createcode.sub.SubEvent();
+      products.put(key , new com.owant.createcode.sub.SubEvent());
     } else if("create".equals(key)) {
-      return new com.owant.createcode.CreateEvent();
+      products.put(key , new com.owant.createcode.CreateEvent());
     } else if("destroy".equals(key)) {
-      return new com.owant.createcode.testcode.DestroyEvent();
+      products.put(key , new com.owant.createcode.testcode.DestroyEvent());
     } else if("resume".equals(key)) {
-      return new com.owant.createcode.testcode.ResumeEvent();
+      products.put(key , new com.owant.createcode.testcode.ResumeEvent());
     } else {
       throw new Exception(String.format("没有到key=%s对应的实现",key));
     }
+    return products.get(key);
   }
 }
+
 
 ```
 

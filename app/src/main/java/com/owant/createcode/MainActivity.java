@@ -25,7 +25,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 try {
-                    EventFactory.create("hello").onEvent();
+                    EventFactory eventFactory = new EventFactory();
+                    eventFactory.create("hello").onEvent();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
