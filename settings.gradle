@@ -1,5 +1,5 @@
 include ':app'
-include ':OwantCompiler'
+//include ':OwantCompiler'
 
 
 rootProject.name='CreateCode'

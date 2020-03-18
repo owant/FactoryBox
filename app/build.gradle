@@ -45,5 +45,5 @@ dependencies {
     implementation 'com.google.dagger:dagger:2.2'
     compileOnly 'org.glassfish:javax.annotation:10.0-b28'
 
-    implementation project(':OwantCompiler')
+    implementation 'com.owant.factorybox:factorybox:1.0.1'
 }

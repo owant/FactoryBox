@@ -20,3 +20,15 @@ tasks.withType(JavaCompile) {
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+
+apply plugin: 'com.novoda.bintray-release'
+
+publish {
+    repoName = "HappyCode"
+    userOrg = 'owant'
+    groupId = 'com.owant.factorybox'
+    artifactId = 'factorybox'
+    publishVersion = '1.0.1'
+    desc = 'factory box code'
+    website = 'https://github.com/owant/FactoryBox'
+}
