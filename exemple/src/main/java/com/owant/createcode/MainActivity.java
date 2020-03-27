@@ -8,8 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.owant.createcode.testcode.EventFactory;
-//import com.owant.createcode.testcode.EventFactory;
-//import com.owant.createcode.testcode.EventFactory;
+
 
 public class MainActivity extends AppCompatActivity {
 

@@ -6,7 +6,7 @@ import com.owant.compiler.factorybox.FactoryBox;
  * created by Kyle.Zhong on 2020-03-05
  */
 
-@FactoryBox(key = "resume", product = Event.class)
+@FactoryBox(key =Events.resume, product = Event.class)
 public class ResumeEvent implements Event {
 
     @Override
