@@ -3,9 +3,11 @@ package com.owant.compiler.factorybox;
 import com.google.auto.service.AutoService;
 import com.owant.compiler.create.CollectionProduct;
 import com.owant.compiler.create.FactoryTemp;
+import com.owant.compiler.create.InputModel;
 import com.owant.compiler.create.Product;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -18,10 +20,14 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 
@@ -56,40 +62,80 @@ public class FactoryBoxProcessor extends AbstractProcessor {
 
         //找到注解的类，并把实现的接口进行分类
         productTypes.clear();
-        for (Element element : roundEnvironment.getElementsAnnotatedWith(FactoryBox.class)) {
+        for (Element typeElement : roundEnvironment.getElementsAnnotatedWith(FactoryBox.class)) {
 
-            FactoryBox factoryBoxAnnotation = element.getAnnotation(FactoryBox.class);
+            List<? extends AnnotationMirror> annotationMirrors = typeElement.getAnnotationMirrors();
 
-            //产品检索和判断的key
-            String key = factoryBoxAnnotation.key();
+            for (AnnotationMirror annotationMirror : annotationMirrors) {
 
-            //实现的接口
-            String interfaceName = "";
-            try {
-                Class<?> clazz = factoryBoxAnnotation.product();
-                interfaceName = clazz.getCanonicalName();
-            } catch (MirroredTypeException mte) {
-                DeclaredType classTypeMirror = (DeclaredType) mte.getTypeMirror();
-                TypeElement classTypeElement = (TypeElement) classTypeMirror.asElement();
-                interfaceName = classTypeElement.getQualifiedName().toString();
-            }
+                // Get the ExecutableElement:AnnotationValue pairs from the annotation element
+                Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotationMirror
+                        .getElementValues();
 
-            //被注解所在的包
-            String productPackageName = mElementUtils.getPackageOf(element).getQualifiedName()
-                    .toString();
-            //被注解的类
-            String className = productPackageName + "." + element.getSimpleName().toString();
+                String keyValue = "";
+                String productClassName = "";
+                List<? extends AnnotationValue> constructorNamesArray = null;
+                List<? extends AnnotationValue> constructorTypeArray = null;
 
-            Product product = new Product(key, interfaceName, className);
-            productTypes.add(interfaceName);
-            boolean multiple = products.addProduct(product);
-            if (!multiple) {
-                printlnProcessorError("发现有重复的Key接口实现:" + product.toString());
-                return true;
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : elementValues
+                        .entrySet()) {
+                    String key = entry.getKey().getSimpleName().toString();
+                    Object value = entry.getValue().getValue();
+                    switch (key) {
+                        case "key":
+                            keyValue = (String) value;
+                            break;
+                        case "product":
+                            TypeMirror typeMirror = (TypeMirror) value;
+                            productClassName = typeMirror.toString();
+                            break;
+                        case "constructorName":
+                            constructorNamesArray = (List<? extends AnnotationValue>) value;
+                            break;
+                        case "constructorType":
+                            constructorTypeArray = (List<? extends AnnotationValue>) value;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                //被注解所在的包
+                String productPackageName = mElementUtils.getPackageOf(typeElement)
+                        .getQualifiedName()
+                        .toString();
+                //被注解的类
+                String className =
+                        productPackageName + "." + typeElement.getSimpleName().toString();
+
+                Product product = new Product(keyValue, productClassName, className);
+
+                productTypes.add(productClassName);
+                if (constructorNamesArray != null && constructorTypeArray != null) {
+                    int size = constructorNamesArray.size();
+                    if (size == constructorTypeArray.size()) {
+                        for (int i = 0; i < size; i++) {
+
+                            String typeQualifiedName = ((TypeMirror) constructorTypeArray.get(i)
+                                    .getValue()).toString();
+                            String typeName = constructorNamesArray.get(i).getValue().toString();
+
+                            InputModel inputModel = new InputModel(productClassName,
+                                    typeQualifiedName,
+                                    typeName);
+
+                            product.getConstructorArray().add(inputModel);
+                        }
+                    }
+                }
+                boolean multiple = products.addProduct(product);
+                if (!multiple) {
+                    printlnProcessorError("发现有重复的Key接口实现:" + product.toString());
+                    return true;
+                }
             }
         }
 
-        //接口
         for (String productInterfaceName : productTypes) {
             String factoryPackage = productInterfaceName
                     .substring(0, productInterfaceName.lastIndexOf("."));
@@ -113,7 +159,6 @@ public class FactoryBoxProcessor extends AbstractProcessor {
         return true;
 
     }
-
 
     private void printlnProcessorInfo(String info) {
         mMessager.printMessage(Diagnostic.Kind.NOTE, info);

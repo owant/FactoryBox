@@ -4,10 +4,12 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -40,6 +42,9 @@ public class FactoryTemp {
                 .endControlFlow();
 
         int size = productChildes.size();
+
+        ArrayList<InputModel> inputModels = new ArrayList<>();
+
         for (int i = 0; i < size; i++) {
             Product product = productChildes.get(i);
             String productKey = product.key;
@@ -49,15 +54,35 @@ public class FactoryTemp {
             String productPackageName = productClassName
                     .substring(0, productClassName.lastIndexOf("."));
 
+            ArrayList<InputModel> currentInputArrays = product.getConstructorArray();
+
             if (i == 0) {
                 methodCreateBuilder
                         .beginControlFlow("if($S.equals(key))", productKey)
                         .addStatement("products.put(key , new $T())",
                                 ClassName.get(productPackageName, productClassSimpleName));
             } else {
-                methodCreateBuilder.nextControlFlow("else if($S.equals(key))", productKey)
-                        .addStatement("products.put(key , new $T())",
-                                ClassName.get(productPackageName, productClassSimpleName));
+                if (currentInputArrays.size() == 0) {
+                    methodCreateBuilder.nextControlFlow("else if($S.equals(key))", productKey)
+                            .addStatement("products.put(key , new $T())",
+                                    ClassName.get(productPackageName, productClassSimpleName));
+                } else {
+
+                    StringBuffer inputsBuffer = new StringBuffer("");
+                    for (InputModel inputModel : currentInputArrays) {
+                        inputsBuffer.append(inputModel.typeName).append(",");
+
+                        if (!inputModels.contains(inputModels)) {
+                            inputModels.add(inputModel);
+                        }
+                    }
+                    String inputs = inputsBuffer.substring(0, inputsBuffer.lastIndexOf(","));
+
+                    methodCreateBuilder.nextControlFlow("else if($S.equals(key))", productKey)
+                            .addStatement(
+                                    "products.put(key , new $T(" + inputs + "))",
+                                    ClassName.get(productPackageName, productClassSimpleName));
+                }
             }
         }
 
@@ -80,16 +105,42 @@ public class FactoryTemp {
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build();
 
+        List<FieldSpec> constructorTemps = new ArrayList<>();
+        List<ParameterSpec> parameters = new ArrayList<>();
+        StringBuffer initParamters = new StringBuffer();
+        //输入的构造变量
+        for (InputModel inputModel : inputModels) {
+            String typeQualifiedPackage = inputModel.typeQualifiedName
+                    .substring(0, inputModel.typeQualifiedName.lastIndexOf("."));
+            String typeName = inputModel.typeQualifiedName
+                    .substring(inputModel.typeQualifiedName.lastIndexOf(".") + 1);
+            FieldSpec temp = FieldSpec
+                    .builder(ClassName.get(typeQualifiedPackage, typeName), inputModel.typeName)
+                    .addModifiers(Modifier.PRIVATE)
+                    .build();
+            constructorTemps.add(temp);
+
+            ParameterSpec.Builder parameterBuilder = ParameterSpec
+                    .builder(ClassName.get(typeQualifiedPackage, typeName), inputModel.typeName);
+            parameters.add(parameterBuilder.build());
+
+            initParamters.append("this.").append(inputModel.typeName).append("=")
+                    .append(inputModel.typeName).append(";\n");
+        }
+
         MethodSpec constructor = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
+                .addParameters(parameters)
                 .addStatement("this.$N = new $T<$T,$T>()", "products", HashMap.class, String.class,
                         ClassName.get(packageName, productName))
+                .addStatement(initParamters.toString())
                 .build();
 
         //类
         TypeSpec typeMain = TypeSpec.classBuilder(createClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(events)
+                .addFields(constructorTemps)
                 .addMethod(constructor)
                 .addMethod(methodCreate)
                 .build();

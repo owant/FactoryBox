@@ -19,4 +19,16 @@ public @interface FactoryBox {
      * 实现的产品的接口
      */
     Class product();
+
+
+    /**
+     * 构造函数的输入类型
+     */
+    Class[] constructorType() default {};
+
+
+    /**
+     * 构造函数的输入类型的变量名
+     */
+    String[] constructorName() default {};
 }

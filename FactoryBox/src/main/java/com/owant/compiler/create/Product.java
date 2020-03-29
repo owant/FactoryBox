@@ -1,5 +1,6 @@
 package com.owant.compiler.create;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -13,11 +14,21 @@ public class Product {
     public String fatherClassName;
     public String className;
 
+    ArrayList<InputModel> constructorArray;
+
     public Product(String key, String fatherClassName, String className) {
         this.key = key;
         this.fatherClassName = fatherClassName;
         this.className = className;
+
+        constructorArray = new ArrayList<>();
     }
+
+    public ArrayList<InputModel> getConstructorArray() {
+        return constructorArray;
+    }
+
+
 
     @Override
     public boolean equals(Object o) {
