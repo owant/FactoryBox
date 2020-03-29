@@ -20,6 +20,8 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 
@@ -56,12 +58,22 @@ public class FactoryBoxProcessor extends AbstractProcessor {
         productTypes.clear();
         for (Element element : roundEnvironment.getElementsAnnotatedWith(FactoryBox.class)) {
 
-            String key = element.getAnnotation(FactoryBox.class).key();
-            //获取注解的所有文本情况
-            String annotationValue = element.getAnnotationMirrors().get(0).toString()
-                    .replaceAll("\"", "");
+            FactoryBox factoryBoxAnnotation = element.getAnnotation(FactoryBox.class);
+
+            //产品检索和判断的key
+            String key = factoryBoxAnnotation.key();
+
             //实现的接口
-            String interfaceName = productInterface("product", annotationValue);
+            String interfaceName = "";
+            try {
+                Class<?> clazz = factoryBoxAnnotation.product();
+                interfaceName = clazz.getCanonicalName();
+            } catch (MirroredTypeException mte) {
+                DeclaredType classTypeMirror = (DeclaredType) mte.getTypeMirror();
+                TypeElement classTypeElement = (TypeElement) classTypeMirror.asElement();
+                interfaceName = classTypeElement.getQualifiedName().toString();
+            }
+
             //被注解所在的包
             String productPackageName = mElementUtils.getPackageOf(element).getQualifiedName()
                     .toString();
@@ -102,16 +114,6 @@ public class FactoryBoxProcessor extends AbstractProcessor {
 
     }
 
-    public static String productInterface(String annotationClassKey, String context) {
-        String productFatherName = "";
-        String patternKey = String.format("%s=([^,\\s]*).class", annotationClassKey);
-        Pattern pattern = Pattern.compile(patternKey);
-        Matcher matcher = pattern.matcher(context);
-        if (matcher.find()) {
-            productFatherName = matcher.group(1);
-        }
-        return productFatherName;
-    }
 
     private void printlnProcessorInfo(String info) {
         mMessager.printMessage(Diagnostic.Kind.NOTE, info);

@@ -42,13 +42,22 @@ public class FactoryTemp {
         int size = productChildes.size();
         for (int i = 0; i < size; i++) {
             Product product = productChildes.get(i);
+            String productKey = product.key;
+            String productClassName = product.className;
+            String productClassSimpleName = product.className
+                    .substring(productClassName.lastIndexOf(".") + 1);
+            String productPackageName = productClassName
+                    .substring(0, productClassName.lastIndexOf("."));
+
             if (i == 0) {
                 methodCreateBuilder
-                        .beginControlFlow("if($S.equals(key))", product.key)
-                        .addStatement("products.put(key , new $T())",ClassName.get(packageName, product.className));
+                        .beginControlFlow("if($S.equals(key))", productKey)
+                        .addStatement("products.put(key , new $T())",
+                                ClassName.get(productPackageName, productClassSimpleName));
             } else {
-                methodCreateBuilder.nextControlFlow("else if($S.equals(key))", product.key)
-                        .addStatement("products.put(key , new $T())",ClassName.get(packageName, product.className));
+                methodCreateBuilder.nextControlFlow("else if($S.equals(key))", productKey)
+                        .addStatement("products.put(key , new $T())",
+                                ClassName.get(productPackageName, productClassSimpleName));
             }
         }
 

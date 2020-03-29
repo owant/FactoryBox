@@ -4,6 +4,8 @@
 
 ```
 implementation 'com.owant.factorybox:factorybox:1.0.1'
+annotationProcessor 'com.google.dagger:dagger-compiler:2.2'
+
 ```
 
 使用google的auto-service和AbstractProcessor进行代码生成。看了不少讲解AbstractProcessor的教程，后来我一直在需要找其应用的实例。后来在项目中的一个配置文件经常改动想到了自动生成代码，于是考虑实践一下
@@ -50,32 +52,32 @@ import java.lang.String;
 import java.util.HashMap;
 
 public final class EventFactory {
+
   private final HashMap<String, Event> products;
 
   public EventFactory() {
-    this.products = new HashMap<String,Event>();
+    this.products = new HashMap<String, Event>();
   }
 
   public Event create(String key) throws Exception {
-    Event cache=products.get(key);
-    if(cache!=null) {
+    Event cache = products.get(key);
+    if (cache != null) {
       return cache;
     }
-    if("sub_event".equals(key)) {
-      products.put(key , new com.owant.createcode.sub.SubEvent());
-    } else if("create".equals(key)) {
-      products.put(key , new com.owant.createcode.CreateEvent());
-    } else if("destroy".equals(key)) {
-      products.put(key , new com.owant.createcode.testcode.DestroyEvent());
-    } else if("resume".equals(key)) {
-      products.put(key , new com.owant.createcode.testcode.ResumeEvent());
+    if ("sub_event".equals(key)) {
+      products.put(key, new SubEvent());
+    } else if ("create".equals(key)) {
+      products.put(key, new CreateEvent());
+    } else if ("destroy".equals(key)) {
+      products.put(key, new DestroyEvent());
+    } else if ("resume".equals(key)) {
+      products.put(key, new ResumeEvent());
     } else {
-      throw new Exception(String.format("没有到key=%s对应的实现",key));
+      throw new Exception(String.format("没有到key=%s对应的实现", key));
     }
     return products.get(key);
   }
 }
-
 
 ```
 
