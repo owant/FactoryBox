@@ -1,9 +1,9 @@
 apply plugin: 'java-library'
-version '1.0.1'
+version '1.0.3'
 
 jar {
     manifest {
-        attributes('Manifest-Version': '1.0.0')
+        attributes('Manifest-Version': '1.0.3')
     }
 }
 
@@ -28,7 +28,7 @@ publish {
     userOrg = 'owant'
     groupId = 'com.owant.factorybox'
     artifactId = 'factorybox'
-    publishVersion = '1.0.2'
+    publishVersion = '1.0.3'
     desc = 'factory box code'
     website = 'https://github.com/owant/FactoryBox'
 }

@@ -1,9 +1,9 @@
 # FactoryBox
 
-[![](https://img.shields.io/badge/maven-v1.0.2-brightgreen.svg)](https://bintray.com/owant/HappyCode/factorybox)
+[![](https://img.shields.io/badge/maven-v1.0.3-brightgreen.svg)](https://bintray.com/owant/HappyCode/factorybox)
 
 ```
-implementation 'com.owant.factorybox:factorybox:1.0.1'
+implementation 'com.owant.factorybox:factorybox:1.0.3'
 annotationProcessor 'com.google.dagger:dagger-compiler:2.2'
 
 ```
