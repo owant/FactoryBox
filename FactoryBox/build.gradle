@@ -15,7 +15,7 @@ dependencies {
 
 //默认编码对于java工程需要进行设置
 tasks.withType(JavaCompile) {
-    options.encoding = "utf-8"
+    options.encoding = "UTF-8"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8

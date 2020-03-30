@@ -11,14 +11,16 @@ import com.owant.createcode.testcode.Events;
 
 @FactoryBox(key = Events.create,
         product = Event.class,
-        constructorName = {"context","title"},
-        constructorType = {Context.class,String.class})
+        constructorName = {"context", "title"},
+        constructorType = {Context.class, String.class})
 public class CreateEvent implements Event {
 
     private Context context;
+    private String titile;
 
-    public CreateEvent(Context context) {
+    public CreateEvent(Context context, String title) {
         this.context = context;
+        this.titile = title;
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,27 +57,35 @@ public class FactoryTemp {
 
             ArrayList<InputModel> currentInputArrays = product.getConstructorArray();
 
+            StringBuffer inputsBuffer = new StringBuffer("");
+            for (InputModel inputModel : currentInputArrays) {
+                inputsBuffer.append(inputModel.typeName).append(",");
+                if (!inputModels.contains(inputModel)) {
+                    inputModels.add(inputModel);
+                }
+            }
+            String inputs = "";
+            if (inputsBuffer.length() > 0) {
+                inputs = inputsBuffer.substring(0, inputsBuffer.lastIndexOf(","));
+            }
             if (i == 0) {
-                methodCreateBuilder
-                        .beginControlFlow("if($S.equals(key))", productKey)
-                        .addStatement("products.put(key , new $T())",
-                                ClassName.get(productPackageName, productClassSimpleName));
+                if (currentInputArrays.size() == 0) {
+                    methodCreateBuilder
+                            .beginControlFlow("if($S.equals(key))", productKey)
+                            .addStatement("products.put(key , new $T())",
+                                    ClassName.get(productPackageName, productClassSimpleName));
+                } else {
+                    methodCreateBuilder
+                            .beginControlFlow("if($S.equals(key))", productKey)
+                            .addStatement("products.put(key , new $T(" + inputs + "))",
+                                    ClassName.get(productPackageName, productClassSimpleName));
+                }
             } else {
                 if (currentInputArrays.size() == 0) {
                     methodCreateBuilder.nextControlFlow("else if($S.equals(key))", productKey)
                             .addStatement("products.put(key , new $T())",
                                     ClassName.get(productPackageName, productClassSimpleName));
                 } else {
-
-                    StringBuffer inputsBuffer = new StringBuffer("");
-                    for (InputModel inputModel : currentInputArrays) {
-                        inputsBuffer.append(inputModel.typeName).append(",");
-
-                        if (!inputModels.contains(inputModels)) {
-                            inputModels.add(inputModel);
-                        }
-                    }
-                    String inputs = inputsBuffer.substring(0, inputsBuffer.lastIndexOf(","));
 
                     methodCreateBuilder.nextControlFlow("else if($S.equals(key))", productKey)
                             .addStatement(
@@ -107,7 +116,7 @@ public class FactoryTemp {
 
         List<FieldSpec> constructorTemps = new ArrayList<>();
         List<ParameterSpec> parameters = new ArrayList<>();
-        StringBuffer initParamters = new StringBuffer();
+        List<String> initParameters = new ArrayList<>();
         //输入的构造变量
         for (InputModel inputModel : inputModels) {
             String typeQualifiedPackage = inputModel.typeQualifiedName
@@ -124,17 +133,21 @@ public class FactoryTemp {
                     .builder(ClassName.get(typeQualifiedPackage, typeName), inputModel.typeName);
             parameters.add(parameterBuilder.build());
 
-            initParamters.append("this.").append(inputModel.typeName).append("=")
-                    .append(inputModel.typeName).append(";\n");
+            StringBuffer initParam = new StringBuffer();
+            initParameters.add(initParam.append("this.").append(inputModel.typeName).append("=")
+                    .append(inputModel.typeName).toString());
         }
 
-        MethodSpec constructor = MethodSpec.constructorBuilder()
+        MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameters(parameters)
                 .addStatement("this.$N = new $T<$T,$T>()", "products", HashMap.class, String.class,
-                        ClassName.get(packageName, productName))
-                .addStatement(initParamters.toString())
-                .build();
+                        ClassName.get(packageName, productName));
+
+        for (String initParam : initParameters) {
+            constructorBuilder.addStatement(initParam);
+        }
+        MethodSpec constructor = constructorBuilder.build();
 
         //类
         TypeSpec typeMain = TypeSpec.classBuilder(createClassName)
