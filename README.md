@@ -2,9 +2,17 @@
 
 [![](https://img.shields.io/badge/maven-v1.0.3-brightgreen.svg)](https://bintray.com/owant/HappyCode/factorybox)
 
+添加依赖
 ```
 implementation 'com.owant.factorybox:factorybox:1.0.3'
 annotationProcessor 'com.google.dagger:dagger-compiler:2.2'
+```
+设置配置
+```
+  defaultConfig {
+    //生成代码
+    javaCompileOptions.annotationProcessorOptions.includeCompileClasspath = true
+  }
 ```
 
 使用google的auto-service和AbstractProcessor进行代码生成。看了不少讲解AbstractProcessor的教程，后来我一直在需要找其应用的实例。后来在项目中的一个配置文件经常改动想到了自动生成代码，于是考虑实践一下
