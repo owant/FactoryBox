@@ -7,6 +7,7 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.owant.createcode.testcode.Event;
 import com.owant.createcode.testcode.EventFactory;
 
 
@@ -23,11 +24,10 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    EventFactory eventFactory = new EventFactory(getApplicationContext(), "Hallo");
-                    eventFactory.create("hello").onEvent();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                EventFactory eventFactory = new EventFactory(getApplicationContext(), "GOGO");
+                Event hello = eventFactory.create("hello");
+                if (hello != null) {
+                    hello.onEvent();
                 }
             }
         });

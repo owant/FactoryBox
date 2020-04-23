@@ -33,7 +33,8 @@ public class FactoryTemp {
         //函数
         MethodSpec.Builder methodCreateBuilder = MethodSpec
                 .methodBuilder("create")
-                .addException(Exception.class)
+                .addJavadoc("Construct the corresponding product through key.\n"
+                        + " If no corresponding product is found, it will return null.\n")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(packageName, productName))
                 .addParameter(String.class, "key")
@@ -97,7 +98,8 @@ public class FactoryTemp {
 
         MethodSpec methodCreate = methodCreateBuilder
                 .nextControlFlow("else")
-                .addStatement("throw new $T($T.format(\"没有到key=%s对应的实现\",key))", Exception.class,
+                .addStatement(
+                        "System.err.printf(\"No corresponding implementation found in key=%s\\n\",key)",
                         String.class)
                 .endControlFlow()
                 .addStatement("return products.get(key)")
@@ -112,6 +114,7 @@ public class FactoryTemp {
         FieldSpec events = FieldSpec
                 .builder(hasMapStringProduct, "products")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                .addJavadoc("cache of products\n")
                 .build();
 
         List<FieldSpec> constructorTemps = new ArrayList<>();
@@ -150,8 +153,10 @@ public class FactoryTemp {
         MethodSpec constructor = constructorBuilder.build();
 
         //类
-        TypeSpec typeMain = TypeSpec.classBuilder(createClassName)
+        TypeSpec mainClass = TypeSpec.classBuilder(createClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addJavadoc("The modified class is automatically generated with comments,\n"
+                        + " and shall not be modified\n")
                 .addField(events)
                 .addFields(constructorTemps)
                 .addMethod(constructor)
@@ -159,7 +164,7 @@ public class FactoryTemp {
                 .build();
 
         //包名
-        JavaFile javaFile = JavaFile.builder(packageName, typeMain).build();
+        JavaFile javaFile = JavaFile.builder(packageName, mainClass).build();
 
         try {
             javaFile.writeTo(processingEnvironment.getFiler());

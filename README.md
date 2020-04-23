@@ -39,8 +39,19 @@ public class DestroyEvent implements Event {
 }
 
 
-@FactoryBox(key = "resume", product = Event.class)
-public class ResumeEvent implements Event {
+@FactoryBox(key = Events.create,
+        product = Event.class,
+        constructorName = {"context", "title"},
+        constructorType = {Context.class, String.class})
+public class CreateEvent implements Event {
+
+    private Context context;
+    private String titile;
+
+    public CreateEvent(Context context, String title) {
+        this.context = context;
+        this.titile = title;
+    }
 
     @Override
     public void onEvent() {
@@ -54,37 +65,67 @@ public class ResumeEvent implements Event {
 ```
 package com.owant.createcode.testcode;
 
-import java.lang.Exception;
+import android.content.Context;
+import com.owant.createcode.CreateEvent;
+import com.owant.createcode.sub.SubEvent;
 import java.lang.String;
 import java.util.HashMap;
 
+/**
+ * The modified class is automatically generated with comments,
+ *  and shall not be modified
+ */
 public final class EventFactory {
-
+  /**
+   * cache of products
+   */
   private final HashMap<String, Event> products;
 
-  public EventFactory() {
-    this.products = new HashMap<String, Event>();
+  private Context context;
+
+  private String title;
+
+  public EventFactory(Context context, String title) {
+    this.products = new HashMap<String,Event>();
+    this.context=context;
+    this.title=title;
   }
 
-  public Event create(String key) throws Exception {
-    Event cache = products.get(key);
-    if (cache != null) {
+  /**
+   * Construct the corresponding product through key.
+   *  If no corresponding product is found, it will return null.
+   */
+  public Event create(String key) {
+    Event cache=products.get(key);
+    if(cache!=null) {
       return cache;
     }
-    if ("sub_event".equals(key)) {
-      products.put(key, new SubEvent());
-    } else if ("create".equals(key)) {
-      products.put(key, new CreateEvent());
-    } else if ("destroy".equals(key)) {
-      products.put(key, new DestroyEvent());
-    } else if ("resume".equals(key)) {
-      products.put(key, new ResumeEvent());
+    if("sub_event".equals(key)) {
+      products.put(key , new SubEvent());
+    } else if("create".equals(key)) {
+      products.put(key , new CreateEvent(context,title));
+    } else if("destroy".equals(key)) {
+      products.put(key , new DestroyEvent(context));
+    } else if("resume".equals(key)) {
+      products.put(key , new ResumeEvent(title));
     } else {
-      throw new Exception(String.format("没有到key=%s对应的实现", key));
+      System.err.printf("No corresponding implementation found in key=%s\n",key);
     }
     return products.get(key);
   }
 }
+
+
+```
+
+4、使用
+
+```
+   EventFactory eventFactory = new EventFactory(getApplicationContext(), "GOGO");
+   Event hello = eventFactory.create("hello");
+   if (hello != null) {
+          hello.onEvent();
+   }
 
 ```
 
