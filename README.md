@@ -15,7 +15,7 @@ annotationProcessor 'com.google.dagger:dagger-compiler:2.2'
   }
 ```
 
-使用google的auto-service和AbstractProcessor进行代码生成。看了不少讲解AbstractProcessor的教程，后来我一直在需要找其应用的实例。后来在项目中的一个配置文件经常改动想到了自动生成代码，于是考虑实践一下
+在项目中的一个配置文件经常改动想到了自动生成代码，于是考虑实践一下,后来发现其实拓展性很好，也适用大多数的代码
 
 ## 例子
 1、需要实现的接口
