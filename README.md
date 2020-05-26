@@ -139,3 +139,6 @@ public final class EventFactory {
 * 1.0.1 实现一个简易的工厂
 * 1.0.2 优化代码，实现工厂缓存
 * 1.0.3 实现支持构造函数的工厂
+
+## 其他
+https://blog.csdn.net/u012131702/article/details/104790543
