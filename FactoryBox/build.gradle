@@ -3,7 +3,7 @@ version '1.0.3'
 
 jar {
     manifest {
-        attributes('Manifest-Version': '1.0.3')
+        attributes('Manifest-Version': '1.0.4')
     }
 }
 
@@ -16,6 +16,10 @@ dependencies {
 //默认编码对于java工程需要进行设置
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
+}
+
+tasks.withType(Javadoc).all {
+    enabled = false
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
