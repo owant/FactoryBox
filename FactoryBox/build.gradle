@@ -28,7 +28,7 @@ publish {
     userOrg = 'owant'
     groupId = 'com.owant.factorybox'
     artifactId = 'factorybox'
-    publishVersion = '1.0.3'
+    publishVersion = '1.0.4'
     desc = 'factory box code'
     website = 'https://github.com/owant/FactoryBox'
 }

@@ -11,14 +11,14 @@ import java.util.Objects;
 public class Product {
 
     public String key;
-    public String fatherClassName;
+    public String productFatherClassName;
     public String className;
 
     ArrayList<InputModel> constructorArray;
 
-    public Product(String key, String fatherClassName, String className) {
+    public Product(String key, String productFatherClassName, String className) {
         this.key = key;
-        this.fatherClassName = fatherClassName;
+        this.productFatherClassName = productFatherClassName;
         this.className = className;
 
         constructorArray = new ArrayList<>();
@@ -40,12 +40,12 @@ public class Product {
         }
         Product product = (Product) o;
         return Objects.equals(key, product.key) &&
-                Objects.equals(fatherClassName, product.fatherClassName);
+                Objects.equals(productFatherClassName, product.productFatherClassName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, fatherClassName);
+        return Objects.hash(key, productFatherClassName);
     }
 
 
@@ -53,8 +53,9 @@ public class Product {
     public String toString() {
         return "Product{" +
                 "key='" + key + '\'' +
-                ", fatherClassName='" + fatherClassName + '\'' +
+                ", fatherClassName='" + productFatherClassName + '\'' +
                 ", className='" + className + '\'' +
+                ", constructorArray=" + constructorArray +
                 '}';
     }
 }

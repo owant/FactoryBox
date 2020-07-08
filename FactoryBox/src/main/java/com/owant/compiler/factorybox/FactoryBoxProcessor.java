@@ -5,13 +5,13 @@ import com.owant.compiler.create.CollectionProduct;
 import com.owant.compiler.create.FactoryTemp;
 import com.owant.compiler.create.InputModel;
 import com.owant.compiler.create.Product;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -25,8 +25,6 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
@@ -40,8 +38,8 @@ import javax.tools.Diagnostic;
 @AutoService(Processor.class)
 public class FactoryBoxProcessor extends AbstractProcessor {
 
-    private Elements mElementUtils;
-    private Messager mMessager;
+    private Elements elementUtils;
+    private Messager messager;
 
     private CollectionProduct products;
     private TreeSet<String> productTypes;
@@ -49,9 +47,8 @@ public class FactoryBoxProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
-
-        mElementUtils = processingEnv.getElementUtils();
-        mMessager = processingEnv.getMessager();
+        elementUtils = processingEnv.getElementUtils();
+        messager = processingEnv.getMessager();
         products = new CollectionProduct();
         productTypes = new TreeSet<>();
     }
@@ -62,13 +59,13 @@ public class FactoryBoxProcessor extends AbstractProcessor {
 
         //找到注解的类，并把实现的接口进行分类
         productTypes.clear();
+
         for (Element typeElement : roundEnvironment.getElementsAnnotatedWith(FactoryBox.class)) {
 
             List<? extends AnnotationMirror> annotationMirrors = typeElement.getAnnotationMirrors();
 
             for (AnnotationMirror annotationMirror : annotationMirrors) {
 
-                // Get the ExecutableElement:AnnotationValue pairs from the annotation element
                 Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotationMirror
                         .getElementValues();
 
@@ -101,37 +98,46 @@ public class FactoryBoxProcessor extends AbstractProcessor {
                 }
 
                 //被注解所在的包
-                String productPackageName = mElementUtils.getPackageOf(typeElement)
+                String productPackageName = elementUtils.getPackageOf(typeElement)
                         .getQualifiedName()
                         .toString();
+
                 //被注解的类
                 String className =
                         productPackageName + "." + typeElement.getSimpleName().toString();
 
-                Product product = new Product(keyValue, productClassName, className);
+                if (productClassName == null || productClassName.length() == 0
+                        || keyValue == null && keyValue.length() == 0) {
+                    printlnProcessorInfo("productClassName is empty");
+                } else {
+                    Product product = new Product(keyValue, productClassName, className);
+                    productTypes.add(productClassName);
+                    printlnProcessorInfo("添加构建：" + product.toString() + "\t");
 
-                productTypes.add(productClassName);
-                if (constructorNamesArray != null && constructorTypeArray != null) {
-                    int size = constructorNamesArray.size();
-                    if (size == constructorTypeArray.size()) {
-                        for (int i = 0; i < size; i++) {
+                    if (constructorNamesArray != null && constructorTypeArray != null) {
+                        int size = constructorNamesArray.size();
+                        if (size == constructorTypeArray.size()) {
+                            for (int i = 0; i < size; i++) {
 
-                            String typeQualifiedName = ((TypeMirror) constructorTypeArray.get(i)
-                                    .getValue()).toString();
-                            String typeName = constructorNamesArray.get(i).getValue().toString();
+                                String typeQualifiedName = ((TypeMirror) constructorTypeArray.get(i)
+                                        .getValue()).toString();
+                                String typeName = constructorNamesArray.get(i).getValue()
+                                        .toString();
 
-                            InputModel inputModel = new InputModel(productClassName,
-                                    typeQualifiedName,
-                                    typeName);
+                                InputModel inputModel = new InputModel(productClassName,
+                                        typeQualifiedName,
+                                        typeName);
 
-                            product.getConstructorArray().add(inputModel);
+                                product.getConstructorArray().add(inputModel);
+                            }
                         }
                     }
-                }
-                boolean multiple = products.addProduct(product);
-                if (!multiple) {
-                    printlnProcessorError("发现有重复的Key接口实现:" + product.toString());
-                    return true;
+
+                    boolean multiple = products.addProduct(product);
+                    if (!multiple) {
+                        printlnProcessorError("发现有重复的Key接口实现:" + product.toString());
+                        return true;
+                    }
                 }
             }
         }
@@ -144,7 +150,7 @@ public class FactoryBoxProcessor extends AbstractProcessor {
 
             List<Product> childPrs = new ArrayList<>();
             for (Product product : products.getProducts()) {
-                if (product.fatherClassName.equals(productInterfaceName)) {
+                if (product.productFatherClassName.equals(productInterfaceName)) {
                     childPrs.add(product);
                 }
             }
@@ -161,11 +167,11 @@ public class FactoryBoxProcessor extends AbstractProcessor {
     }
 
     private void printlnProcessorInfo(String info) {
-        mMessager.printMessage(Diagnostic.Kind.NOTE, info);
+        messager.printMessage(Diagnostic.Kind.NOTE, info);
     }
 
     private void printlnProcessorError(String info) {
-        mMessager.printMessage(Diagnostic.Kind.ERROR, info);
+        messager.printMessage(Diagnostic.Kind.ERROR, info);
     }
 
 }
