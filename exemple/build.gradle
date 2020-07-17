@@ -11,9 +11,6 @@ android {
     versionName "1.0"
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-
-    //生成代码
-    javaCompileOptions.annotationProcessorOptions.includeCompileClasspath = true
   }
   buildTypes {
 
@@ -41,7 +38,8 @@ dependencies {
   androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
 
-  implementation project(path: ':FactoryBox')
-  annotationProcessor 'com.google.dagger:dagger-compiler:2.2'
-//  implementation 'com.owant.factorybox:factorybox:1.0.3'
+//  implementation project(path: ':FactoryBox')
+
+  implementation 'com.owant.factorybox:factorybox:1.0.4'
+  annotationProcessor 'com.owant.factorybox:factorybox:1.0.4'
 }

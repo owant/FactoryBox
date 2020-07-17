@@ -1,19 +1,13 @@
 # FactoryBox
 
-[![](https://img.shields.io/badge/maven-v1.0.3-brightgreen.svg)](https://bintray.com/owant/HappyCode/factorybox)
+[![](https://img.shields.io/badge/maven-v1.0.4-brightgreen.svg)](https://bintray.com/owant/HappyCode/factorybox)
 
 添加依赖
 ```
-implementation 'com.owant.factorybox:factorybox:1.0.3'
-annotationProcessor 'com.google.dagger:dagger-compiler:2.2'
+implementation 'com.owant.factorybox:factorybox:1.0.4'
+annotationProcessor 'com.owant.factorybox:factorybox:1.0.4'
 ```
-设置配置
-```
-  defaultConfig {
-    //生成代码
-    javaCompileOptions.annotationProcessorOptions.includeCompileClasspath = true
-  }
-```
+
 
 在项目中的一个配置文件经常改动想到了自动生成代码，于是考虑实践一下,后来发现其实拓展性很好，也适用大多数的代码
 
